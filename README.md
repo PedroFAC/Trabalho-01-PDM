@@ -1,4 +1,4 @@
-# Vamos Rachar!
+# Vamos rachar!
 
 Atividade 02 da disciplina Programação para Dispositivos móveis.
 Criada em React Native(Expo).

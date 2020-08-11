@@ -1,9 +1,7 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Share } from "react-native";
+import { StyleSheet, Share } from "react-native";
 import {
   Container,
-  Content,
   Item,
   Label,
   Input,
@@ -17,28 +15,49 @@ import * as Speech from "expo-speech";
 export default function App() {
   const [cost, setCost] = useState("0");
   const [people, setPeople] = useState("0");
-  const [individual, setIndividual] = useState(null);
-  const messageToShare =
-    "A Conta de " +
-    cost +
-    " reais dividida para " +
-    people +
-    " é: R$ " +
-    individual;
+  const [individual, setIndividual] = useState("Insira valores");
+  const messageToShare = `A conta de R$ ${cost} dividida para ${people} pessoas é: ${individual}`;
   const onShare = async () => {
-    if (people !== "0") {
+    let isZero = notZero(Number(cost), Number(people));
+    if (isZero) {
+      await Share.share({
+        message: "Número de pessoas ou valor inválido",
+      });
+    } else {
       await Share.share({
         message: messageToShare,
       });
     }
   };
-  const onSpeech = (message) => Speech.speak(message);
-
-  useEffect(() => {
-    if (people !== "0" || people !== null) {
-      setIndividual((Number(cost) / Number(people)).toFixed(2));
+  const onSpeech = () => {
+    let message = "";
+    let isZero = notZero(Number(cost), Number(people));
+    if (isZero) {
+      message = "Número de pessoas ou valor inválido";
     } else {
-      setIndividual("Valor Incorreto");
+      message = messageToShare;
+    }
+    Speech.speak(message);
+  };
+
+  function notZero(numerator, denominator) {
+    if (
+      denominator === 0 ||
+      isNaN(denominator) ||
+      numerator === 0 ||
+      isNaN(denominator)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  useEffect(() => {
+    let isZero = notZero(Number(cost), Number(people));
+    if (isZero) {
+      setIndividual("");
+    } else {
+      setIndividual(`R$ ${(Number(cost) / Number(people)).toFixed(2)}`);
     }
   }, [cost, people]);
   return (
@@ -62,7 +81,7 @@ export default function App() {
           />
         </Item>
       </Form>
-      <H1 style={styles.individual}>R$ {individual}</H1>
+      <H1 style={styles.individual}>{individual}</H1>
       <Fab style={styles.fab} onPress={onShare} position="bottomLeft">
         <Icon style={styles.fabIcon} name="share" />
       </Fab>
